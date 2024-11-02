@@ -9,7 +9,7 @@ import { useSession } from 'next-auth/react'
 
 export default function Component() {
   const session = useSession();
-  const redirect = useRedirect();
+    useRedirect();
   try {
       if (!session.data?.user.id) {
           return (
@@ -17,7 +17,7 @@ export default function Component() {
           )
       }
       return <StreamView creatorId={session.data.user.id} playVideo={true} />
-  } catch(e) {
+  } catch {
       return null
   }
 }

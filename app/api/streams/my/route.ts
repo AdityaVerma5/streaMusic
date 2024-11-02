@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     const session = await getServerSession(); // fetch user details on backend
     // TODO : Can get rid of db call
 

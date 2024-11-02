@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {z} from "zod"
 import { prismaClient } from "@/app/lib/db";
-//@ts-ignore
+// @ts-expect-error : : YouTubePlayer may not have TypeScript types or has compatibility issues
 import youtubesearchapi from "youtube-search-api"
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";

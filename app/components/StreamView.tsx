@@ -11,7 +11,7 @@ import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 import { Appbar } from './Appbar'
 import 'react-toastify/dist/ReactToastify.css';
-// @ts-expect-error
+// @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
 import YouTubePlayer from 'youtube-player'
 
 interface Video {
@@ -48,8 +48,8 @@ export default function StreamView({
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
       credentials: "include",
     })
-    const json = await res.json()
-    setQueue(json.streams.sort((a: any, b: any) => a.upvotes < b.upvotes ? 1 : -1))
+    const json: { streams: Video[]; activeSteam: { stream: Video | null } } = await res.json();
+    setQueue(json.streams.sort((a: Video, b: Video) => a.upvotes < b.upvotes ? 1 : -1))
     
     setCurrentVideo(video => {
       if (video?.id === json.activeSteam?.stream?.id) {
@@ -150,7 +150,6 @@ export default function StreamView({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        icon: '✅',  // Using a checkmark icon similar to the image
         style: {
           backgroundColor: '#00a36c',  // Match the green color in the image
           color: 'white',
@@ -169,7 +168,6 @@ export default function StreamView({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        icon: '❌',
         style: {
           backgroundColor: '#d9534f',  // Red background for error
           color: 'white',
@@ -266,7 +264,7 @@ export default function StreamView({
                     <div>
                       <div className="aspect-video bg-black">
                         {playVideo ? (
-                          // @ts-ignore
+                          // @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
                           <div ref={videoPlayerRef} className="w-full h-full" />
                         ) : (
                           <img
