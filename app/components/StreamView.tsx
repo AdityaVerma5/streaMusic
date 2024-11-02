@@ -70,11 +70,12 @@ export default function StreamView({
 
   useEffect(() => {
     if (!currentVideo) return
-    let player = YouTubePlayer(videoPlayerRef.current)
+    const player = YouTubePlayer(videoPlayerRef.current)
 
     player.loadVideoById(currentVideo?.extractedId)
     player.playVideo()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function eventHandler(event: any) {
       if (event.data === 0) {
         playNext()
