@@ -43,43 +43,51 @@ export async function POST(req:NextRequest){
         }
 
 
-        const extractedId = data.url.split("?v=")[1];
-        const res = await youtubesearchapi.GetVideoDetails(extractedId);
-        const thumbnails = res.thumbnail.thumbnails;
-        thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
-
-        const existingActiveStream = await prismaClient.stream.findFirst({
-            where: {
-                addedById: user.id,
+        try {
+            const extractedId = data.url.split("?v=")[1];
+            const res = await youtubesearchapi.GetVideoDetails(extractedId);
+        
+            let thumbnails = [];
+            let title = "Can't find video";
+            let smallImg = "https://images.minitool.com/moviemaker.minitool.com/images/uploads/articles/2020/08/youtube-video-not-available/youtube-video-not-available-1.png";
+            let bigImg = smallImg;
+        
+            if (res && res.thumbnail && res.thumbnail.thumbnails) {
+                thumbnails = res.thumbnail.thumbnails;
+                thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
+                
+                title = res.title || title;
+                smallImg = (thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : thumbnails[thumbnails.length - 1].url) || smallImg;
+                bigImg = thumbnails[thumbnails.length - 1].url || bigImg;
             }
-        })
-
-        if(existingActiveStream && existingActiveStream?.userId !== user.id){
+        
+            const stream = await prismaClient.stream.create({
+                data: {
+                    userId: data.creatorId,
+                    url: data.url,
+                    extractedId,
+                    type: "Youtube",
+                    title,
+                    smallImg,
+                    bigImg,
+                    addedById: user.id,
+                }
+            });
+        
             return NextResponse.json({
-                message: "Already playing a stream"
-            },{
-                status: 403,
-            })
+                ...stream,
+                hasUpvoted: false,
+                upvotes: 0,       
+            });
+        } catch (error) {
+            console.error("Error while adding a stream:", error);
+            return NextResponse.json({
+                message: "Error while adding a stream",
+                error: error instanceof Error ? error.message : String(error)
+            }, {
+                status: 500,
+            });
         }
-
-        const stream = await prismaClient.stream.create({
-            data: {
-                userId: data.creatorId,
-                url: data.url,
-                extractedId,
-                type: "Youtube",
-                title: res.title ?? "Can't find video",
-                smallImg: (thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : thumbnails[thumbnails.length - 1].url) ?? "https://images.minitool.com/moviemaker.minitool.com/images/uploads/articles/2020/08/youtube-video-not-available/youtube-video-not-available-1.png",
-                bigImg: thumbnails[thumbnails.length - 1].url ?? "https://images.minitool.com/moviemaker.minitool.com/images/uploads/articles/2020/08/youtube-video-not-available/youtube-video-not-available-1.png",
-                addedById: user.id,
-            }
-        })
-
-        return NextResponse.json({
-            ...stream,
-            hasUpvoted: false,
-            upvotes: 0,       
-        })
     }
     catch(error: unknown) {
         console.error("Detailed error:", error);
