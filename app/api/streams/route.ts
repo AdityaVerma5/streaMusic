@@ -80,7 +80,8 @@ export async function POST(req:NextRequest){
             hasUpvoted: false,
             upvotes: 0,       
         })
-    }catch{
+    }catch(e){
+        console.log(e);
         return NextResponse.json({
             message: "Error while adding a stream"
         },{
