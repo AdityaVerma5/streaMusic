@@ -5,6 +5,7 @@ import { prismaClient } from "@/app/lib/db";
 import youtubesearchapi from "youtube-search-api"
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
+export const dynamic = 'force-dynamic';
 
 
 const CreateStreamSchema = z.object({
