@@ -142,7 +142,7 @@ export default function StreamView({
   }
 
   const handleShare = () => {
-    const shareableLink = `${window.location.hostname}:3000/creator/${creatorId}`
+    const shareableLink = `${window.location.hostname}/creator/${creatorId}`
     navigator.clipboard.writeText(shareableLink).then(() => {
       toast.success('Copied to clipboard', {
         position: "top-right",
