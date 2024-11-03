@@ -101,17 +101,30 @@ export default function StreamView({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!inputLink.match(YT_REGEX)) return toast.error("Invalid YouTube URL")
     setLoading(true)
-    const res = await fetch('/api/streams/', {
-      method: "POST",
-      body: JSON.stringify({
-        creatorId,
-        url: inputLink,
+
+    try {
+      // Send only the URL, the server will fetch and process video metadata
+      const res = await fetch('/api/streams/', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creatorId, url: inputLink })
       })
-    })
-    setQueue([...queue, await res.json()])
-    setLoading(false)
-    setInputLink('')
+
+      if (!res.ok) throw new Error("Failed to add stream")
+
+      const newStream: Video = await res.json()  // Use server-provided metadata directly
+
+      // Update queue with server response (already includes title, thumbnail, etc.)
+      setQueue(prev => [...prev, newStream].sort((a, b) => b.upvotes - a.upvotes))
+      setInputLink('')
+    } catch (error) {
+      console.error("Error adding stream:", error)
+      toast.error("Could not add stream.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleVote = (id: string, isUpvote: boolean) => {
