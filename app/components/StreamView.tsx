@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { Button } from "@/components/ui/button"
@@ -9,12 +9,10 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 import { Appbar } from './Appbar'
-import 'react-toastify/dist/ReactToastify.css';
+import 'react-toastify/dist/ReactToastify.css'
 import dynamic from 'next/dynamic'
-const LiteYouTubeEmbed = dynamic(() => import('react-lite-youtube-embed'), { ssr: false })
-// @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
-const YouTubePlayer = dynamic(() => import('youtube-player'), { ssr: false })
 
+const LiteYouTubeEmbed = dynamic(() => import('react-lite-youtube-embed'), { ssr: false })
 
 interface Video {
   "id": string
@@ -44,14 +42,14 @@ export default function StreamView({
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null)
   const [loading, setLoading] = useState(false)
   const [playNextLoader, setPlayNextLoader] = useState(false)
-  const videoPlayerRef = useRef<HTMLDivElement>()
+  const videoPlayerRef = useRef<HTMLDivElement>(null)
 
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
       credentials: "include",
     })
-    const json: { streams: Video[]; activeSteam: { stream: Video | null } } = await res.json();
-    setQueue(json.streams.sort((a: Video, b: Video) => a.upvotes < b.upvotes ? 1 : -1))
+    const json: { streams: Video[]; activeSteam: { stream: Video | null } } = await res.json()
+    setQueue(json.streams.sort((a, b) => a.upvotes < b.upvotes ? 1 : -1))
     
     setCurrentVideo(video => {
       if (video?.id === json.activeSteam?.stream?.id) {
@@ -68,12 +66,14 @@ export default function StreamView({
     }, REFRESH_INTERVAL_MS)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [creatorId])
 
   useEffect(() => {
     if (!currentVideo || !videoPlayerRef.current) return
 
-    let player: any
+// @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
+
+    let player: ReturnType<typeof import('youtube-player')>
 
     const loadPlayer = async () => {
       // @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
@@ -83,7 +83,7 @@ export default function StreamView({
       player.loadVideoById(currentVideo.extractedId)
       player.playVideo()
 
-      player.on('stateChange', (event: any) => {
+      player.on('stateChange', (event: { data: number }) => {
         if (event.data === 0) {
           playNext()
         }
@@ -162,16 +162,16 @@ export default function StreamView({
         pauseOnHover: true,
         draggable: true,
         style: {
-          backgroundColor: '#00a36c',  // Match the green color in the image
+          backgroundColor: '#00a36c',
           color: 'white',
           borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '16px',
         },
-        closeButton: false,  // Remove close button or style as needed
-      });
+        closeButton: false,
+      })
     }).catch((err) => {
-      console.error('Could not copy text:', err);
+      console.error('Could not copy text:', err)
       toast.error('Failed to copy link. Please try again.', {
         position: "top-right",
         autoClose: 3000,
@@ -180,17 +180,16 @@ export default function StreamView({
         pauseOnHover: true,
         draggable: true,
         style: {
-          backgroundColor: '#d9534f',  // Red background for error
+          backgroundColor: '#d9534f',
           color: 'white',
           borderRadius: '8px',
           padding: '8px 16px',
           fontSize: '16px',
         },
         closeButton: false,
-      });
-    });
-  };
-  
+      })
+    })
+  }
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <Appbar/>
@@ -275,7 +274,6 @@ export default function StreamView({
                     <div>
                       <div className="aspect-video bg-black">
                         {playVideo ? (
-                          // @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
                           <div ref={videoPlayerRef} className="w-full h-full" />
                         ) : (
                           <img
