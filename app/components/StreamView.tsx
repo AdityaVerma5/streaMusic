@@ -309,7 +309,7 @@ export default function StreamView({
             {inputLink && inputLink.match(YT_REGEX) && !loading && (
               <Card className="bg-[#111827]/50 border-gray-800">
                 <CardContent className="p-4">
-                  <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
+                  <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1] } params="nocookie-1"/>
                 </CardContent>
               </Card>
             )}
