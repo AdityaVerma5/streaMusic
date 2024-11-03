@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const allowedOrigins = ['https://strea-music.vercel.app', 'http://localhost:3000']
+const allowedOrigins = ['https://strea-music.vercel.app/dashboard', 'http://localhost:3000']
 
 export async function cors(req: NextRequest) {
   const origin = req.headers.get('origin') ?? ''
