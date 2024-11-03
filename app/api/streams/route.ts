@@ -5,45 +5,50 @@ import { prismaClient } from "@/app/lib/db";
 import youtubesearchapi from "youtube-search-api"
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
+import { cors } from "@/lib/core";
 export const dynamic = 'force-dynamic';
-
 
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
     url: z.string(),
 })
 
-export async function POST(req:NextRequest){
-    try {
-        const data = CreateStreamSchema.parse(await req.json());
-        const isYt = data.url.match(YT_REGEX)
-        if(!isYt){
-            return NextResponse.json({
-                message: "Wrong URL format"
-            },{
-                status: 411,
-            })
-        }
+async function handler(req: NextRequest) {
+    // Run the middleware
+    await cors(req);
 
-        const session = await getServerSession(); // fetch user details on backend
-        // TODO : Can get rid of db call
+    if (req.method === 'OPTIONS') {
+        return new NextResponse(null, { status: 200 });
+    }
 
-        const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? "",
-        }
-        })
-     
-        if(!user){
-            return NextResponse.json({
-            message: "Unauthenticated"
-        },{
-            status: 403,
-        })
-        }
-
-
+    if (req.method === 'POST') {
         try {
+            const data = CreateStreamSchema.parse(await req.json());
+            const isYt = data.url.match(YT_REGEX)
+            if(!isYt){
+                return NextResponse.json({
+                    message: "Wrong URL format"
+                },{
+                    status: 411,
+                })
+            }
+
+            const session = await getServerSession();
+
+            const user = await prismaClient.user.findFirst({
+                where: {
+                    email: session?.user?.email ?? "",
+                }
+            })
+         
+            if(!user){
+                return NextResponse.json({
+                    message: "Unauthenticated"
+                },{
+                    status: 403,
+                })
+            }
+
             const extractedId = data.url.split("?v=")[1];
             const res = await youtubesearchapi.GetVideoDetails(extractedId);
         
@@ -88,87 +93,69 @@ export async function POST(req:NextRequest){
                 status: 500,
             });
         }
-    }
-    catch(error: unknown) {
-        console.error("Detailed error:", error);
-        
-        let errorMessage = "Error while adding a stream";
-        
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        
-        return NextResponse.json({
-          message: errorMessage
-        }, {
-          status: 500,
-        });
-    }
-}
+    } else if (req.method === 'GET') {
+        const creatorId = req.nextUrl.searchParams.get("creatorId");
+        const session = await getServerSession();
 
-
-// fetch current stream
-export async function GET(req: NextRequest) {
-    
-    const creatorId = req.nextUrl.searchParams.get("creatorId"); // get creatorId from query params
-    const session = await getServerSession(); // fetch user details on backend
-    // TODO : Can get rid of db call
-
-    const user = await prismaClient.user.findFirst({
-        where: {
-            email: session?.user?.email ?? "",
-        }
-    })
-     
-    if(!user){
-        return NextResponse.json({
-            message: "Unauthenticated"
-        },{
-            status: 403,
+        const user = await prismaClient.user.findFirst({
+            where: {
+                email: session?.user?.email ?? "",
+            }
         })
-    }
+         
+        if(!user){
+            return NextResponse.json({
+                message: "Unauthenticated"
+            },{
+                status: 403,
+            })
+        }
 
-    if(!creatorId){
-        return NextResponse.json({
-            message: "Error"
-        },{
-            status: 411,
-        })
-    }
+        if(!creatorId){
+            return NextResponse.json({
+                message: "Error"
+            },{
+                status: 411,
+            })
+        }
 
-    const [streams, activeSteam] = await Promise.all([prismaClient.stream.findMany({
-        where: {
-            userId: creatorId,
-            played: false,
-        },
-        include: {
-            _count: {
-                select: {
-                    upvotes: true,
-                }
+        const [streams, activeSteam] = await Promise.all([prismaClient.stream.findMany({
+            where: {
+                userId: creatorId,
+                played: false,
             },
-            upvotes: {
-                where: {
-                    userId: user.id,
+            include: {
+                _count: {
+                    select: {
+                        upvotes: true,
+                    }
+                },
+                upvotes: {
+                    where: {
+                        userId: user.id,
+                    }
                 }
             }
-        }
-    }), prismaClient.currentStream.findFirst({
-        where: {
-            userId: creatorId,
-        },
-        include: {
-            stream: true
-        }
-    })])    
+        }), prismaClient.currentStream.findFirst({
+            where: {
+                userId: creatorId,
+            },
+            include: {
+                stream: true
+            }
+        })])    
 
-    return NextResponse.json({
-        streams: streams.map(({_count, ...rest}) => ({
-            ...rest,
-            upvotes: _count.upvotes,
-            haveUpvoted: rest.upvotes.length ? true : false,
-        })),
-        activeSteam
-    })
+        return NextResponse.json({
+            streams: streams.map(({_count, ...rest}) => ({
+                ...rest,
+                upvotes: _count.upvotes,
+                haveUpvoted: rest.upvotes.length ? true : false,
+            })),
+            activeSteam
+        })
+    } else {
+        return new NextResponse(null, { status: 405 });
+    }
 }
 
+export { handler as GET, handler as POST };
