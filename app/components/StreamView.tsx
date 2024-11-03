@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown, Share2, Play, ChevronUp } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
-import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
 import { Appbar } from './Appbar'
 import 'react-toastify/dist/ReactToastify.css';
+import dynamic from 'next/dynamic'
+const LiteYouTubeEmbed = dynamic(() => import('react-lite-youtube-embed'), { ssr: false })
 // @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
-import YouTubePlayer from 'youtube-player'
+const YouTubePlayer = dynamic(() => import('youtube-player'), { ssr: false })
+
 
 interface Video {
   "id": string
@@ -69,25 +71,33 @@ export default function StreamView({
   }, [])
 
   useEffect(() => {
-    if (!currentVideo) return
-    const player = YouTubePlayer(videoPlayerRef.current)
+    if (!currentVideo || !videoPlayerRef.current) return
 
-    player.loadVideoById(currentVideo?.extractedId)
-    player.playVideo()
+    let player: any
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function eventHandler(event: any) {
-      if (event.data === 0) {
-        playNext()
-      }
+    const loadPlayer = async () => {
+      // @ts-expect-error : YouTubePlayer may not have TypeScript types or has compatibility issues
+      const YouTubePlayer = (await import('youtube-player')).default
+      player = YouTubePlayer(videoPlayerRef.current)
+
+      player.loadVideoById(currentVideo.extractedId)
+      player.playVideo()
+
+      player.on('stateChange', (event: any) => {
+        if (event.data === 0) {
+          playNext()
+        }
+      })
     }
 
-    player.on('stateChange', eventHandler)
+    loadPlayer()
 
     return () => {
-      player.destroy()
+      if (player) {
+        player.destroy()
+      }
     }
-  }, [currentVideo, videoPlayerRef])
+  }, [currentVideo])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
