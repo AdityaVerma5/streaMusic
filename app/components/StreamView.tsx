@@ -102,7 +102,7 @@ export default function StreamView({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const res = await fetch('/api/streams', {
+    const res = await fetch('/api/streams/', {
       method: "POST",
       body: JSON.stringify({
         creatorId,
