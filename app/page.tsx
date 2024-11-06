@@ -30,7 +30,7 @@ export default function Component() {
       <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <Music size={64} className="text-purple-500 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold mb-4">Welcome to StreamTunes</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to StreamMusic</h1>
           <p className="text-xl text-gray-300 mb-8">
             Let your live chat decide what songs play next. Create a dynamic playlist for your stream!
           </p>
@@ -64,7 +64,7 @@ export default function Component() {
           <h2 className="text-2xl font-bold mb-4 text-center">What Streamers Say</h2>
           <blockquote className="text-center">
             <p className="text-lg text-gray-300 mb-4">
-              &quot;StreamTunes has revolutionized my streaming experience. My audience loves being part of the music selection process!&quot;
+              &quot;StreamMusic has revolutionized my streaming experience. My audience loves being part of the music selection process!&quot;
             </p>
             <footer className="text-purple-400">- Alex, Twitch Streamer</footer>
           </blockquote>
