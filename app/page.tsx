@@ -26,11 +26,11 @@ export default function Component() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
-          <Appbar/>
+      <Appbar/>
       <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <Music size={64} className="text-purple-500 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold mb-4">Welcome to StreamMusic</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to StreamTunes</h1>
           <p className="text-xl text-gray-300 mb-8">
             Let your live chat decide what songs play next. Create a dynamic playlist for your stream!
           </p>
@@ -56,7 +56,7 @@ export default function Component() {
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
             <Star className="text-purple-500 w-12 h-12 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Customizable Experience</h2>
-            <p className="text-gray-400">Tailor the music selection process to fit your stream's vibe</p>
+            <p className="text-gray-400">Tailor the music selection process to fit your stream&apos;s vibe</p>
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export default function Component() {
           <h2 className="text-2xl font-bold mb-4 text-center">What Streamers Say</h2>
           <blockquote className="text-center">
             <p className="text-lg text-gray-300 mb-4">
-              "StreamMusic has revolutionized my streaming experience. My audience loves being part of the music selection process!"
+              &quot;StreamTunes has revolutionized my streaming experience. My audience loves being part of the music selection process!&quot;
             </p>
             <footer className="text-purple-400">- Alex, Twitch Streamer</footer>
           </blockquote>

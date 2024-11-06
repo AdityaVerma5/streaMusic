@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { ChevronDown, Share2, Play, ChevronUp } from "lucide-react"
+import { ChevronDown, Share2, Play, ChevronUp, Music } from "lucide-react"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { YT_REGEX } from '../lib/utils'
@@ -204,38 +204,39 @@ export default function StreamView({
     })
   }
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
       <Appbar/>
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-[1fr,400px] gap-6">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-6">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Upcoming Songs</h2>
+              <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
               <Button 
                 onClick={handleShare}
                 variant="outline" 
                 size="sm" 
-                className="text-purple-400 border-purple-800 hover:bg-purple-900/50"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
               >
                 <Share2 className="h-4 w-4 mr-2" /> Share
               </Button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               {queue.length === 0 ? (
-                <Card className="bg-gray-900/50 border-gray-800">
-                  <CardContent className="p-4 text-center text-gray-500">
+                <Card className="bg-gray-800 border-gray-700 shadow-lg">
+                  <CardContent className="p-8 text-center text-gray-400">
+                    <Music className="h-12 w-12 mx-auto mb-4 text-purple-500" />
                     Queue is empty
                   </CardContent>
                 </Card>
               ) : (
                 queue.map((video) => (
-                  <Card key={video.id} className="bg-[#111827]/50 border-gray-800 hover:bg-[#111827] transition-colors">
-                    <CardContent className="p-3 flex items-center gap-4">
+                  <Card key={video.id} className="bg-gray-800 border-gray-700 hover:bg-gray-700 transition-colors shadow-lg">
+                    <CardContent className="p-4 flex items-center gap-4">
                       <img
                         src={video.smallImg || "/placeholder.svg?height=80&width=80"}
                         alt={video.title}
-                        className="w-16 h-16 rounded object-cover flex-shrink-0"
+                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm text-white truncate leading-tight">{video.title}</h3>
@@ -244,8 +245,8 @@ export default function StreamView({
                         onClick={() => handleVote(video.id, !video.haveUpvoted)}
                         variant="outline"
                         size="sm"
-                        className={`bg-gray-800 text-white border-gray-700 hover:bg-gray-700 ${
-                          video.haveUpvoted ? 'bg-purple-700 hover:bg-purple-800' : ''
+                        className={`rounded-full transition duration-300 ease-in-out transform hover:scale-105 ${
+                          video.haveUpvoted ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'
                         }`}
                       >
                         {video.haveUpvoted ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
@@ -259,70 +260,70 @@ export default function StreamView({
           </div>
 
           <div className="space-y-6">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-white">Add a song</h2>
-              <form onSubmit={handleSubmit} className="space-y-2">
-                <Input
-                  type="text"
-                  placeholder="Paste YouTube link here"
-                  value={inputLink}
-                  onChange={(e) => setInputLink(e.target.value)}
-                  className="bg-[#111827]/50 border-gray-800 text-white placeholder:text-gray-500"
-                />
-                <Button 
-                  disabled={loading} 
-                  type="submit" 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  {loading ? "Adding..." : "Add to Queue"}
-                </Button>
-              </form>
-            </div>
+            <Card className="bg-gray-800 border-gray-700 shadow-lg">
+              <CardContent className="p-6 space-y-4">
+                <h2 className="text-xl font-bold text-white">Add a song</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <Input
+                    type="text"
+                    placeholder="Paste YouTube link here"
+                    value={inputLink}
+                    onChange={(e) => setInputLink(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                  <Button 
+                    disabled={loading} 
+                    type="submit" 
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105"
+                  >
+                    {loading ? "Adding..." : "Add to Queue"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-white">Now Playing</h2>
-              <Card className="bg-[#111827]/50 border-gray-800 overflow-hidden">
-                <CardContent className="p-0">
-                  {currentVideo ? (
-                    <div>
-                      <div className="aspect-video bg-black">
-                        {playVideo ? (
-                          <div ref={videoPlayerRef} className="w-full h-full" />
-                        ) : (
-                          <img
-                            src={currentVideo.bigImg}
-                            alt="Current video thumbnail"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-sm font-medium text-white">{currentVideo.title}</h3>
-                      </div>
+            <Card className="bg-gray-800 border-gray-700 shadow-lg overflow-hidden">
+              <CardContent className="p-0">
+                <h2 className="text-xl font-bold text-white p-4">Now Playing</h2>
+                {currentVideo ? (
+                  <div>
+                    <div className="aspect-video bg-black">
+                      {playVideo ? (
+                        <div ref={videoPlayerRef} className="w-full h-full" />
+                      ) : (
+                        <img
+                          src={currentVideo.bigImg}
+                          alt="Current video thumbnail"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
-                  ) : (
-                    <div className="aspect-video flex items-center justify-center text-gray-500">
-                      No video playing
+                    <div className="p-4">
+                      <h3 className="text-sm font-medium text-white">{currentVideo.title}</h3>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </div>
+                ) : (
+                  <div className="aspect-video flex items-center justify-center bg-gray-900 text-gray-500">
+                    <Music className="h-12 w-12 text-purple-500" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-              {playVideo && (
-                <Button
-                  onClick={playNext}
-                  disabled={playNextLoader}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play Next"}
-                </Button>
-              )}
-            </div>
+            {playVideo && (
+              <Button
+                onClick={playNext}
+                disabled={playNextLoader}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
+              >
+                <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play Next"}
+              </Button>
+            )}
 
             {inputLink && inputLink.match(YT_REGEX) && !loading && (
-              <Card className="bg-[#111827]/50 border-gray-800">
+              <Card className="bg-gray-800 border-gray-700 shadow-lg overflow-hidden">
                 <CardContent className="p-4">
-                  <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1] } params="nocookie-1"/>
+                  <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} params="nocookie-1"/>
                 </CardContent>
               </Card>
             )}
@@ -335,8 +336,8 @@ export default function StreamView({
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
-        toastClassName="bg-gray-800 text-white" // Customize to your theme
-      bodyClassName="text-sm"
+        toastClassName="bg-gray-800 text-white"
+        bodyClassName="text-sm"
       />
     </div>
   )
